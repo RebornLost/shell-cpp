@@ -15,10 +15,15 @@ int main() {
     string input;
 
     getline(cin , input);
-
+ // exit command
     if( input == "exit") {
       break;
     }
+//echo command
+  if(input.substr(0,5) == "echo "){
+    cout << input << "\n" ;
+    break ;
+  }    
 
     cerr << input << ": command not found" << "\n" ;
   }
