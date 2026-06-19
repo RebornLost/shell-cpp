@@ -17,9 +17,7 @@ int main() {
 
     getline(cin , input);
  // exit command
-    if( input == "exit") {
-      break;
-    }
+    if( input == "exit") {break;}
 //echo command
   if(input.substr(0,5) == "echo "){
     cout << input.substr(5) << "\n";
