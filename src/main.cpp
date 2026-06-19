@@ -1,13 +1,22 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 int main() {
   
-  std::cout << std::unitbuf;
-  std::cerr << std::unitbuf;
+  cout << std::unitbuf;
+  cerr << std::unitbuf;
 
-  std::cout << "$ " ; 
+  cout << "$ " ; 
   
+  string a;
+   
+  cin >> a;
+  
+  cerr << a << "invalid command" ;
+
+
   return 0;
 
 }
