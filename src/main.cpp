@@ -22,7 +22,9 @@ int main() {
     }
 //echo command
   if(input.substr(0,5) == "echo "){
-    cout << input.substr(5,strlen(input)-5) << "\n" ;
+    int a = strlen(input);
+    a -= 5;
+    cout << input.substr(5,a) << "\n" ;
     break ;
   }    
 
