@@ -16,7 +16,7 @@ int main() {
 
     getline(cin , input);
 
-    cerr << input << ":command not found" << "\n" ;
+    cerr << input << ": command not found" << "\n" ;
   }
 
   return 0;
