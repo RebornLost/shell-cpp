@@ -8,14 +8,17 @@ int main() {
   cout << std::unitbuf;
   cerr << std::unitbuf;
 
-  cout << "$ " ; 
-  
   string input;
+  
+  start:
+
+  cout << "$ " ; 
    
   getline(cin , input);
 
-  cerr << input << ": command not found" ;
-
+  cerr << input << ": command not found" << "\n" ;
+  
+  goto start;
 
   return 0;
 
