@@ -26,8 +26,8 @@ int main() {
   }
 
   if(input.substr(0,5) == "type "){
-    if (input.substr(5) == "echo"){cout << "echo is a shell builtin" <<"\n": }
-    else if (input.substr(5) == "exit"){cout << "exit is a shell builtin" <<"\n": }
+    if (input.substr(5) == "echo"){cout << "echo is a shell builtin" <<"\n"; }
+    else if (input.substr(5) == "exit"){cout << "exit is a shell builtin" <<"\n"; }
   }
  
   //command not found    
