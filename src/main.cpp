@@ -13,10 +13,10 @@ int main() {
   while(true){
 
     cout << "$" ; 
-    
+
     getline(cin , input);
 
-    cerr << a << ":command not found" << "\n"
+    cerr << input << ":command not found" << "\n"
 
 
   }
