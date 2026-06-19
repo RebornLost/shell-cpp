@@ -21,7 +21,7 @@ int main() {
     }
 //echo command
   if(input.substr(0,5) == "echo "){
-    cout << input << "\n" ;
+    cout << input.string(5,strlen(input)-5) << "\n" ;
     break ;
   }    
 
