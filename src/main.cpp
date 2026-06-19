@@ -22,15 +22,12 @@ int main() {
     }
 //echo command
   if(input.substr(0,5) == "echo "){
-    int a = input.length();
-    a -= 5;
-    cout << input.substr(5,a) << "\n" ;
-    break ;
+    cout << input.substr(5) << "\n";
   }    
-
+else {
     cerr << input << ": command not found" << "\n" ;
   }
-
+}
   return 0;
 
 }
