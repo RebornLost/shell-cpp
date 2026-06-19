@@ -29,7 +29,7 @@ int main() {
     if (input.substr(5) == "echo"){cout << "echo is a shell builtin" <<"\n"; }
     else if (input.substr(5) == "exit"){cout << "exit is a shell builtin" <<"\n"; }
     else if (input.substr(5) == "type"){cout << "type is a shell builtin" <<"\n";}
-    else ( cout << input.substr(5) <<: not found << "\n" ;)
+    else ( cout << input.substr(5) <<": not found << "\n" ;)
   }
  
   //command not found    
