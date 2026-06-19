@@ -25,7 +25,7 @@ int main() {
     cout << input.substr(5) << "\n";
   }
 
-  if(input.substr(0,5) == "type "){
+  else if(input.substr(0,5) == "type "){
     if (input.substr(5) == "echo"){cout << "echo is a shell builtin" <<"\n"; }
     else if (input.substr(5) == "exit"){cout << "exit is a shell builtin" <<"\n"; }
     else if (input.substr(5) == "type"){cout << "type is a shell builtin" <<"\n";}
