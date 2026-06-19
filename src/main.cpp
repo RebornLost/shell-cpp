@@ -10,7 +10,7 @@ int main() {
   
   while(true){
 
-    cout << "$" ; 
+    cout << "$ " ; 
 
     string input;
 
