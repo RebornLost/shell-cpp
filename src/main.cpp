@@ -7,12 +7,12 @@ int main() {
   
   cout << std::unitbuf;
   cerr << std::unitbuf;
-
-   string input;
   
   while(true){
 
     cout << "$" ; 
+
+    string input;
 
     getline(cin , input);
 
