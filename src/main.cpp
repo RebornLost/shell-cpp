@@ -10,11 +10,11 @@ int main() {
 
   cout << "$ " ; 
   
-  string a;
+  string input;
    
-  cin >> a;
+  getline(cin , input);
 
-  cerr << a << ": command not found" ;
+  cerr << input << ": command not found" ;
 
 
   return 0;
