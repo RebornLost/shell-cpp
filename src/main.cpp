@@ -13,8 +13,8 @@ int main() {
   string a;
    
   cin >> a;
-  
-  cerr << a << "invalid command" ;
+
+  cerr << a << ": command not found" ;
 
 
   return 0;
