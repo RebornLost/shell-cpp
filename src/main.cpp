@@ -23,7 +23,8 @@ int main() {
 //echo command
   if(input.substr(0,5) == "echo "){
     cout << input.substr(5) << "\n";
-  }    
+  }
+//command not found    
 else {
     cerr << input << ": command not found" << "\n" ;
   }
