@@ -4,65 +4,11 @@
 #include <vector>
 #include <sstream>
 #include <unistd.h>
-
+#include <sys/wait.h>
 using namespace std;
-/*
-int main()
-{
 
-  cout << std::unitbuf;
-  cerr << std::unitbuf;
-
-  while (true)
-  {
-
-    cout << "$ ";
-
-    string input;
-
-    getline(cin, input);
-
-    string command = input.substr(0, input.find(' '));
-    string parameters = input.substr(input.find(' ') + 1);
-
-    if (command == "exit")
-    {
-      break;
-    }
-
-    else if (command == "echo")
-    {
-      cout << parameters << "\n";
-    }
-
-    else if (command == "type")
-    {
-      if (parameters == "echo" || parameters == "exit" || parameters == "type")
-      {
-        cout << parameters << " is a shell builtin" << "\n";
-        
-      }
-
-      const char* env_p = getenv("PATH");
-      cout << env_p << "\n";
-
-      
-
-      else
-        cout << parameters << ": not found"<<"\n";
-    }
-
-    else
-    {
-      cerr << input << ": command not found" << "\n";
-    }
-
-    }
-  return 0;
-  }
-*/
 string builtin_commands[] = {"echo", "exit", "type"};
-
+//PATH finder
 string PATH(string command){
   const char* env_p = getenv("PATH");
   //cout << env_p << "\n";
@@ -81,6 +27,85 @@ string PATH(string command){
   return "not found";
   
 }
+
+//builtin checker
+bool builtin(string parameters){
+  bool is_builtin = false;
+  for(auto it : builtin_commands){
+  if( parameters == it )
+  {cout << it << " is a shell builtin" << "\n"; 
+  is_builtin = true;
+  return is_builtin;}
+  }
+   return is_builtin;
+}
+
+
+//echo command
+void echo(string output){
+  cout << output << "\n";
+  return;
+}
+//type command
+void type(string parameters){
+  bool is_builtin = builtin(parameters);
+
+  if(!is_builtin){
+ 
+  string path_result = PATH(parameters);
+  
+  if (path_result != "not found") {
+    cout << parameters << " is " << path_result << "\n";
+  } else {
+    cout << parameters << ": not found" << "\n";
+  }
+}
+  return;
+}
+
+//execute command
+void execute(string userinput){ 
+	
+	
+//separate the input by spaces
+ stringstream ss(userinput);
+ string tokens;
+ vector<string> inputcommands;
+
+ while(getline(ss,tokens,' ')){
+	 inputcommands.push_back(tokens);
+ }
+
+ bool test = builtin(inputcommands[0]);
+ if (test == true){
+ return;
+ }
+ string address= PATH(inputcommands[0]);
+ if(address == "not found"){
+ cout << inputcommands[0] << ": command not found" << "\n";
+ return;
+ }
+ vector<char*> char_commands;
+
+ for(auto const  &x: inputcommands){
+ char_commands.push_back(const_cast<char*>(x.c_str()));//convert to char*
+ }
+ char_commands.push_back(NULL);
+
+ pid_t p;
+	p = fork();//create child process
+
+  if (p == 0){
+  execv(address.c_str(),char_commands.data());//execute command
+  }
+ 
+  if(p > 0){
+  int status;
+  wait(&status);
+  return;
+  }
+}
+//REPL
 void REPL(){
   string userinput ;
 
@@ -90,45 +115,28 @@ void REPL(){
 
   string command = userinput.substr(0, userinput.find(' '));
   string parameters = userinput.substr(userinput.find(' ')+1);
-  
-  if (command == "exit")
+ 
+   if (command == "exit")
   {
     return;
   }
   else if (command == "echo")
   {
-    cout << parameters << "\n";
+    echo(parameters);
   }
-  else if(command == "type"){
-    bool is_builtin = false;
-    for (const auto& cmd : builtin_commands) {
-      if (cmd == parameters) {
-        is_builtin = true;
-        break;
-      }
-    }
-    if (is_builtin) {
-      cout << parameters << " is a shell builtin" << "\n";
-    } else {
-      string path_result ;
-      path_result = PATH(parameters);
-
-      if (path_result != "not found") {
-        cout << parameters << " is " << path_result << "\n";
-      } else {
-      cout << parameters << ": not found" << "\n";}
-    }
+  else if (command == "type")
+  {
+    type(parameters);
   }
-  else {
-    cout << "" << command << ": command not found" << "\n";
-  }
-  }
+   else{
+   execute(userinput);}
+ }  
 }
+
 int main(){
-  
+cout << unitbuf; 
+cerr << unitbuf;  
+
 REPL();
-
-
-
 return 0;
 }
