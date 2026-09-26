@@ -70,7 +70,7 @@ void type(string parameters){
   if (path_result != "not found") {
     cout << parameters << " is " << path_result << "\n";
   } else {
-    cout << parameters << ": not found" << "\n";
+    cerr << parameters << ": not found" << "\n";
   }
 }
   return;
@@ -111,7 +111,7 @@ void execute(string userinput){
  }
  string address= PATH(inputcommands[0]);
  if(address == "not found"){
- cout << inputcommands[0] << ": command not found" << "\n";
+ cerr << inputcommands[0] << ": command not found" << "\n";
  return;
  }
  vector<char*> char_commands;
@@ -162,6 +162,30 @@ void redirect_right(string cmd , string file_part){
 }
 
 
+void redirect_error(string cmd , string file_part){
+ size_t first = file_part.find_first_not_of(" \t");
+ size_t last = file_part.find_last_not_of(" \t");
+ if(first != std::string::npos && last != std::string::npos){
+       file_part = file_part.substr(first , last - first + 1);
+ }
+
+   std::filesystem::path p(file_part);
+    if(p.has_parent_path()){
+        std::filesystem::create_directories(p.parent_path());
+    }
+
+    int saved_stdout = dup(2);
+    int fd = open(file_part.c_str() , O_WRONLY | O_CREAT | O_TRUNC , 0664);
+    dup2(fd , 2);
+    close(fd);
+
+    execute(cmd);
+    std::cerr.flush();
+
+    dup2(saved_stdout , 2);
+    close(saved_stdout);
+
+}
 
 //REPL
 void REPL(){
@@ -174,8 +198,21 @@ void REPL(){
   string command = userinput.substr(0, userinput.find(' '));
   string parameters = userinput.substr(userinput.find(' ')+1);
 
+
+  //redirect error
+   size_t e_pos = userinput.find("2>");
+   if(e_pos != std::string::npos){
+    std::string left = userinput.substr(0 , e_pos);
+    std::string right = userinput.substr(e_pos + 2);
+    redirect_error(left , right);
+    continue;
+   }
+
+
+  //redirect output
    size_t pos = userinput.find("1>");
    int op_len = 2;
+   
    if(pos == std::string::npos){
      pos = userinput.find(">");
      op_len = 1;
@@ -187,6 +224,7 @@ void REPL(){
      redirect_right(cmd , file_part);
      continue; 
    }
+
 if(command == "exit"){
       break;
   }

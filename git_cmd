@@ -1,0 +1,12 @@
+Before sumbit code-
+git branch -m main master
+codecrafters submit
+
+After sumbit accepted-
+git branch -m master main
+
+push-
+git add .
+git commit -m "Your progress message"
+git push
+
