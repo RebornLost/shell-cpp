@@ -136,6 +136,31 @@ void execute(string userinput){
   }
 }
 
+void append_output(string cmd , string file_part){
+ size_t first = file_part.find_first_not_of(" \t");
+ size_t last = file_part.find_last_not_of(" \t");
+ if(first != std::string::npos && last != std::string::npos){
+       file_part = file_part.substr(first , last - first + 1);
+ }
+
+   std::filesystem::path p(file_part);
+    if(p.has_parent_path()){
+        std::filesystem::create_directories(p.parent_path());
+    }
+
+    int saved_stdout = dup(1);
+    int fd = open(file_part.c_str() , O_WRONLY | O_CREAT | O_APPEND , 0664);
+    dup2(fd , 1);
+    close(fd);
+
+    execute(cmd);
+    std::cout.flush();
+
+    dup2(saved_stdout , 1);
+    close(saved_stdout);
+
+}
+
 void redirect_right(string cmd , string file_part){
  size_t first = file_part.find_first_not_of(" \t");
  size_t last = file_part.find_last_not_of(" \t");
@@ -207,7 +232,22 @@ void REPL(){
     redirect_error(left , right);
     continue;
    }
+  
+   //append
+   size_t a_pos = userinput.find("1>>");
+   int a_op_len = 3;
+   
+   if(a_pos == std::string::npos){
+     a_pos = userinput.find(">>");
+     a_op_len = 2;
+   }
 
+   if(a_pos !=  std::string::npos ){
+       std::string left = userinput.substr(0 , a_pos);
+       std::string right = userinput.substr(a_pos + a_op_len);
+     append_output(left , right);
+     continue; 
+   }
 
   //redirect output
    size_t pos = userinput.find("1>");
