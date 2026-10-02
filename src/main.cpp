@@ -94,7 +94,12 @@ void builtin_exe(string userinput){
 }
 
 //execute command
-void execute(string userinput){ 	
+void run_cmd(string userinput){ 	
+//remove spaces in front
+ size_t first = userinput.find_first_not_of(" \t");
+ if(first != std::string::npos){
+       userinput = userinput.substr(first);
+ }
 //separate the input by spaces
  stringstream ss(userinput);
  string tokens;
@@ -112,6 +117,7 @@ void execute(string userinput){
  string address= PATH(inputcommands[0]);
  if(address == "not found"){
  cerr << inputcommands[0] << ": command not found" << "\n";
+ exit(0);
  return;
  }
  vector<char*> char_commands;
@@ -120,22 +126,22 @@ void execute(string userinput){
  char_commands.push_back(const_cast<char*>(x.c_str()));//convert to char*
  }
 
- char_commands.push_back(NULL);
-
- pid_t p;
-	p = fork();//create child process
-
-  if (p == 0){
-  execv(address.c_str(),char_commands.data());//execute command
-  }
- 
-  if(p > 0){
-  int status;
-  wait(&status);
-  return;
-  }
+ char_commands.push_back(NULL); // last must be NULL
+ execv(address.c_str(),char_commands.data());//execute command
+ perror("execv");
 }
 
+void execute( string userinput){
+   pid_t p;
+   p = fork();//create child process
+  if (p == 0){
+    run_cmd(userinput); 
+    exit(0);
+  }
+  else{
+    wait(NULL);     
+  }
+}
 void append_output(string cmd , string file_part){
  size_t first = file_part.find_first_not_of(" \t");
  size_t last = file_part.find_last_not_of(" \t");
@@ -237,6 +243,51 @@ void redirect_error(string cmd , string file_part){
     close(saved_stdout);
 
 }
+void piping(string left , string right){
+    int pipefds[2];
+    
+    pipe(pipefds);
+    
+    pid_t p1 ;
+    pid_t p2 ;     
+
+        int saved_stdout = dup(1);
+        int saved_stdin = dup(0);
+    p1 = fork();
+
+    if(p1 == 0){
+        dup2(pipefds[1] , 1);
+        close(pipefds[1]);
+        close(pipefds[0]);  
+        run_cmd(left);
+
+        exit(0); //close the child to avoid it going into parent and not make a child inside the child
+       }
+    p2 = fork();
+
+    if(p2 == 0){
+        dup2(pipefds[0] , 0);
+        close(pipefds[0]);
+        close(pipefds[1]);
+        run_cmd(right);
+
+        exit(0);
+       } 
+
+        std::cout.flush();
+        close(pipefds[0]);
+        close(pipefds[1]);
+        dup2(saved_stdout , 1);
+        close(saved_stdout); 
+        dup2(saved_stdin,0);
+        close(saved_stdin);
+
+
+        int status1;
+        int status2;
+        wait(&status1);
+        wait(&status2);
+   } 
 
 //REPL
 void REPL(){
@@ -248,6 +299,19 @@ void REPL(){
 
   string command = userinput.substr(0, userinput.find(' '));
   string parameters = userinput.substr(userinput.find(' ')+1);
+
+  if(command == "exit"){
+       break;
+  }
+    
+    //pipe
+  size_t p_pos = userinput.find("|");
+  if(p_pos != std::string::npos){
+    std::string left = userinput.substr(0 , p_pos);
+    std::string right = userinput.substr(p_pos + 1);
+    piping(left , right);
+    continue;
+  }
 
   //append error
   size_t a_e_pos = userinput.find("2>>");
@@ -299,11 +363,11 @@ void REPL(){
      continue; 
    }
 
-if(command == "exit"){
-      break;
-  }
  bool test = builtin(command);
   if (test == true){
+    if(command == "exit"){
+        break;
+    }
      builtin_exe(userinput);
    }
   
@@ -313,6 +377,9 @@ if(command == "exit"){
 }
 
 int main(){
+    setvbuf(stdout, NULL, _IONBF, 0);
+    setvbuf(stderr, NULL, _IONBF, 0);
+    setvbuf(stdin,  NULL, _IONBF, 0);
 cout << unitbuf; 
 cerr << unitbuf;  
 
