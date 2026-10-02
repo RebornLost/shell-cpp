@@ -37,14 +37,26 @@ string PATH(string command){
 
 //builtin checker
 bool builtin(string parameters){
-  bool is_builtin = false;
+ //remove spaces in front
+ size_t first = parameters.find_first_not_of(" \t");
+ if(first != std::string::npos){
+      parameters = parameters.substr(first);
+ }
+//separate the input by spaces
+ stringstream ss(parameters);
+ string tokens;
+ vector<string> inputcommands;
+
+ while(getline(ss,tokens,' ')){
+	 inputcommands.push_back(tokens);
+ }
+ 
   for(auto it : builtin_commands){
-  if( parameters == it ){
-  is_builtin = true;
-  return is_builtin;
+    if( inputcommands[0] == it ){
+         return true;
+    }
   }
-  }
-   return is_builtin;
+   return false;
 }
 
 
@@ -123,7 +135,7 @@ void run_cmd(string userinput){
  vector<char*> char_commands;
 
  for(auto const  &x: inputcommands){
- char_commands.push_back(const_cast<char*>(x.c_str()));//convert to char*
+     char_commands.push_back(const_cast<char*>(x.c_str()));//convert to char*
  }
 
  char_commands.push_back(NULL); // last must be NULL
@@ -132,6 +144,7 @@ void run_cmd(string userinput){
 }
 
 void execute( string userinput){
+
    pid_t p;
    p = fork();//create child process
   if (p == 0){
@@ -238,14 +251,13 @@ void redirect_error(string cmd , string file_part){
 
     execute(cmd);
     std::cerr.flush();
-
     dup2(saved_stdout , 2);
     close(saved_stdout);
 
 }
 void piping(string left , string right){
     int pipefds[2];
-    
+
     pipe(pipefds);
     
     pid_t p1 ;
@@ -253,6 +265,33 @@ void piping(string left , string right){
 
         int saved_stdout = dup(1);
         int saved_stdin = dup(0);
+   /* if(builtin(left) && builtin(right)){
+        dup2(pipefds[1] , 1);
+        dup2(pipefds[0] , 0);
+
+        close(pipefds[0]);
+        close(pipefds[1]);
+
+        builtin_exe(left); 
+        builtin_exe(right);
+
+        dup2(saved_stdin , 0);
+        close(saved_stdin);
+
+        dup2(saved_stdout , 1);
+        close(saved_stdout);
+
+        return;
+        }
+    
+    if(builtin(left)){
+        dup2(pipefds[1] , 1);
+        close(pipefds[0]);
+        close(pipefds[1]);
+        builtin_exe(left); 
+    }
+    else{
+    */
     p1 = fork();
 
     if(p1 == 0){
@@ -263,6 +302,7 @@ void piping(string left , string right){
 
         exit(0); //close the child to avoid it going into parent and not make a child inside the child
        }
+   
     p2 = fork();
 
     if(p2 == 0){
@@ -309,6 +349,12 @@ void REPL(){
   if(p_pos != std::string::npos){
     std::string left = userinput.substr(0 , p_pos);
     std::string right = userinput.substr(p_pos + 1);
+     size_t first = left.find_first_not_of(" \t");
+     size_t last = left.find_last_not_of(" \t");
+     if(first != std::string::npos && last != std::string::npos){
+        left = left.substr(first , last - first + 1);
+    }
+
     piping(left , right);
     continue;
   }
